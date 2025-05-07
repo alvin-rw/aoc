@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"slices"
 	"strconv"
 	"strings"
 )
@@ -15,7 +16,7 @@ const (
 	decreasing
 )
 
-func calculateSafeReport(inputFilePath string) (int, error) {
+func CalculateNumberOfSafeReport(inputFilePath string, isDampened bool) (int, error) {
 	numOfSafeReport := 0
 
 	reports, err := getReportsFromFile(inputFilePath)
@@ -24,7 +25,7 @@ func calculateSafeReport(inputFilePath string) (int, error) {
 	}
 
 	for _, report := range reports {
-		isSafe := checkReportSafety(report)
+		isSafe := checkReportSafetyWithToleration(report, isDampened)
 
 		if isSafe {
 			numOfSafeReport++
@@ -32,6 +33,24 @@ func calculateSafeReport(inputFilePath string) (int, error) {
 	}
 
 	return numOfSafeReport, nil
+}
+
+func checkReportSafetyWithToleration(report []int, isDampened bool) bool {
+	result := checkReportSafety(report)
+
+	if !result && isDampened {
+		for i := range report {
+			tempReport := slices.Clone(report)
+			tempReport = slices.Delete(tempReport, i, i+1)
+
+			result = checkReportSafety(tempReport)
+			if result {
+				break
+			}
+		}
+	}
+
+	return result
 }
 
 func checkReportSafety(report []int) bool {
