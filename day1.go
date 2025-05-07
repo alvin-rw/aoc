@@ -11,8 +11,7 @@ import (
 	"strings"
 )
 
-// part 1
-func totalDistance(inputFilePath string) (int, error) {
+func CalculateTotalDistance(inputFilePath string) (int, error) {
 	firstList, secondList, err := getSlicesFromInputFile(inputFilePath)
 	if err != nil {
 		return -1, fmt.Errorf("error when getting slice from input file: %v", err)
@@ -37,8 +36,7 @@ func totalDistance(inputFilePath string) (int, error) {
 	return totalDistance, nil
 }
 
-// part 2
-func getSimilarityScore(inputFilePath string) (int, error) {
+func CalculateSimilarityScore(inputFilePath string) (int, error) {
 	firstList, secondList, err := getSlicesFromInputFile(inputFilePath)
 	if err != nil {
 		return -1, fmt.Errorf("error when getting slice from input file: %v", err)

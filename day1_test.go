@@ -4,8 +4,8 @@ import (
 	"testing"
 )
 
-func TestTotalDistance(t *testing.T) {
-	totalDist, err := totalDistance("./day1_input.txt")
+func TestCalculateTotalDistance(t *testing.T) {
+	totalDist, err := CalculateTotalDistance("./day1_input.txt")
 	if err != nil {
 		t.Errorf("an error occured, %+v", err)
 	}
@@ -13,8 +13,8 @@ func TestTotalDistance(t *testing.T) {
 	t.Logf("total distance: %d", totalDist)
 }
 
-func TestGetSimilarityScore(t *testing.T) {
-	similarityScore, err := getSimilarityScore("./day1_input.txt")
+func TestCalculateSimilarityScore(t *testing.T) {
+	similarityScore, err := CalculateSimilarityScore("./day1_input.txt")
 	if err != nil {
 		t.Errorf("an error occured, %+v", err)
 	}
