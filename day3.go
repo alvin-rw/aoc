@@ -29,10 +29,23 @@ const (
 	rNumSecondChar
 	rNumThirdChar
 	rPharenthesis
+	d
+	o
+	n
+	singleQuote
+	t
 )
 
-func CalculateMultiplicationResult(inputFilePath string) (int, error) {
-	numbersToMultiply, err := readNumbersToMultiplyFromFile(inputFilePath)
+// command types
+const (
+	invalidCommand = iota
+	mulCommand
+	doCommand
+	dontCommand
+)
+
+func CalculateMultiplicationResult(inputFilePath string, enableDoDonts bool) (int, error) {
+	numbersToMultiply, err := readNumbersToMultiplyFromFile(inputFilePath, enableDoDonts)
 	if err != nil {
 		return -1, err
 	}
@@ -41,7 +54,7 @@ func CalculateMultiplicationResult(inputFilePath string) (int, error) {
 	return result, nil
 }
 
-func readNumbersToMultiplyFromFile(inputFilePath string) ([][]int, error) {
+func readNumbersToMultiplyFromFile(inputFilePath string, enableDoDonts bool) ([][]int, error) {
 	f, err := os.Open(inputFilePath)
 	if err != nil {
 		return nil, fmt.Errorf("error when opening the file, %v", err)
@@ -51,32 +64,59 @@ func readNumbersToMultiplyFromFile(inputFilePath string) ([][]int, error) {
 	// numbersToMultiply stores the numbers that needs to be multiplied from all the mul() instructions
 	numbersToMultiply := [][]int{}
 
-	validMulCounter := invalid
-
 	// tempNumbers stores the first and second numbers obtained from reading the files in a string format
 	// these will be converted when we reached ')' character and appened to numbersToMultiply slice
 	tempFirstNumber := ""
 	tempSecondNumber := ""
 
-	updateCurrentMul := func(valid bool, nextValue int) {
+	enabled := true
+	commandCounter := invalid
+	commandType := invalidCommand
+
+	cleanParameters := func() {
+		commandCounter = invalid
+		tempFirstNumber = ""
+		tempSecondNumber = ""
+		commandType = invalidCommand
+	}
+
+	updateCommandVerification := func(valid bool, nextValue int) {
 		if valid {
-			validMulCounter = nextValue
+			if commandCounter == l {
+				commandType = mulCommand
+			} else if commandCounter == o {
+				commandType = doCommand
+			} else if commandCounter == t {
+				commandType = dontCommand
+			}
 
-			if validMulCounter == rPharenthesis {
-				currentFirstNumber, _ := strconv.Atoi(tempFirstNumber)
-				currentSecondNumber, _ := strconv.Atoi(tempSecondNumber)
+			commandCounter = nextValue
 
-				numbersToMultiply = append(numbersToMultiply, []int{currentFirstNumber, currentSecondNumber})
+			if commandCounter == rPharenthesis {
+				switch commandType {
+				case mulCommand:
+					if enabled {
+						currentFirstNumber, _ := strconv.Atoi(tempFirstNumber)
+						currentSecondNumber, _ := strconv.Atoi(tempSecondNumber)
 
-				// clear all the counter and temp numbers after adding it to the numbersToMultiply slice
-				validMulCounter = invalid
-				tempFirstNumber = ""
-				tempSecondNumber = ""
+						numbersToMultiply = append(numbersToMultiply, []int{currentFirstNumber, currentSecondNumber})
+
+						cleanParameters()
+					}
+
+				case doCommand:
+					enabled = true
+					cleanParameters()
+
+				case dontCommand:
+					if enableDoDonts {
+						enabled = false
+					}
+					cleanParameters()
+				}
 			}
 		} else {
-			validMulCounter = invalid
-			tempFirstNumber = ""
-			tempSecondNumber = ""
+			cleanParameters()
 		}
 	}
 
@@ -93,38 +133,53 @@ func readNumbersToMultiplyFromFile(inputFilePath string) ([][]int, error) {
 
 		switch {
 		case char == 'm':
-			updateCurrentMul(true, m)
-
+			updateCommandVerification(true, m)
 		case char == 'u':
-			updateCurrentMul(validMulCounter == m, u)
-
+			updateCommandVerification(commandCounter == m, u)
 		case char == 'l':
-			updateCurrentMul(validMulCounter == u, l)
+			updateCommandVerification(commandCounter == u, l)
 
 		case char == '(':
-			updateCurrentMul(validMulCounter == l, lPharenthesis)
-
+			updateCommandVerification(commandCounter == l || commandCounter == o || commandCounter == t, lPharenthesis)
 		case char == ',':
-			updateCurrentMul(validMulCounter >= lNumFirstChar && validMulCounter < comma, comma)
-
+			updateCommandVerification(commandCounter >= lNumFirstChar && commandCounter < comma && commandType == mulCommand, comma)
 		case char == ')':
-			updateCurrentMul(validMulCounter >= rNumFirstChar && validMulCounter < rPharenthesis, rPharenthesis)
+			if commandType == mulCommand {
+				updateCommandVerification(commandCounter >= rNumFirstChar && commandCounter < rPharenthesis, rPharenthesis)
+			} else if commandType == doCommand || commandType == dontCommand {
+				updateCommandVerification(commandCounter == lPharenthesis, rPharenthesis)
+			}
+
+		case char == 'd':
+			updateCommandVerification(true, d)
+		case char == 'o':
+			updateCommandVerification(commandCounter == d, o)
+		case char == 'n':
+			updateCommandVerification(commandCounter == o, n)
+		case char == '\'':
+			updateCommandVerification(commandCounter == n, singleQuote)
+		case char == 't':
+			updateCommandVerification(commandCounter == singleQuote, t)
 
 		case slices.Contains(numbers, char):
-			if validMulCounter >= lPharenthesis && validMulCounter < lNumThirdChar {
-				validMulCounter++
+			if commandType == mulCommand {
+				if commandCounter >= lPharenthesis && commandCounter < lNumThirdChar {
+					commandCounter++
 
-				tempFirstNumber = tempFirstNumber + string(char)
-			} else if validMulCounter >= comma && validMulCounter < rNumThirdChar {
-				validMulCounter++
+					tempFirstNumber = tempFirstNumber + string(char)
+				} else if commandCounter >= comma && commandCounter < rNumThirdChar {
+					commandCounter++
 
-				tempSecondNumber = tempSecondNumber + string(char)
+					tempSecondNumber = tempSecondNumber + string(char)
+				} else {
+					updateCommandVerification(false, invalid)
+				}
 			} else {
-				updateCurrentMul(false, invalid)
+				updateCommandVerification(false, invalid)
 			}
 
 		default:
-			updateCurrentMul(false, invalid)
+			updateCommandVerification(false, invalid)
 		}
 	}
 
