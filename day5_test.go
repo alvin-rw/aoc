@@ -9,4 +9,11 @@ func TestCalculateSumOfValidPagesMiddleValue(t *testing.T) {
 	}
 
 	t.Logf("sum of valid pages mid value: %d", sumOfValidPagesMidValue)
+
+	sumOfInvalidPagesMidValue, err := CalculateSumOfInvalidPagesMiddleValue("./day5_input.txt")
+	if err != nil {
+		t.Errorf("an error occured, %+v", err)
+	}
+
+	t.Logf("sum of invalid pages mid value: %d", sumOfInvalidPagesMidValue)
 }

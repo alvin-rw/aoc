@@ -30,6 +30,27 @@ func CalculateSumOfValidPagesMiddleValue(inputFilePath string) (int, error) {
 	return sum, nil
 }
 
+func CalculateSumOfInvalidPagesMiddleValue(inputFilePath string) (int, error) {
+	sum := 0
+
+	pageOrderingRules, printedPageMatrix, err := readPageOrderingRulesAndPrintedPagesFromFile(inputFilePath)
+	if err != nil {
+		return -1, err
+	}
+
+	for _, printedPagesList := range printedPageMatrix {
+		currentPrintedPageMap := createPrintedPagesMap(printedPagesList)
+
+		if !checkPrintedPageCorrectness(currentPrintedPageMap, pageOrderingRules) {
+			fixPrintedPagesOrder(printedPagesList, pageOrderingRules)
+
+			sum = sum + getMiddlePageNumber(printedPagesList)
+		}
+	}
+
+	return sum, nil
+}
+
 func checkPrintedPageCorrectness(printedPageMap map[int][]int, orderingRules map[int][]int) bool {
 	for pageNumber, pagesAfter := range printedPageMap {
 		for _, page := range pagesAfter {
@@ -63,6 +84,31 @@ func getMiddlePageNumber(pages []int) int {
 	midIndex := len(pages) / 2
 
 	return pages[midIndex]
+}
+
+func fixPrintedPagesOrder(printedPageList []int, orderingRules map[int][]int) {
+	printedPageMap := createPrintedPagesMap(printedPageList)
+
+	if !checkPrintedPageCorrectness(printedPageMap, orderingRules) {
+	checker:
+		for pageNumber, pagesAfter := range printedPageMap {
+			for _, checkedPage := range pagesAfter {
+				if slices.Contains(orderingRules[checkedPage], pageNumber) {
+					pageNumberIndex := slices.Index(printedPageList, pageNumber)
+					checkedPageIndex := slices.Index(printedPageList, checkedPage)
+
+					printedPageList = slices.Delete(printedPageList, checkedPageIndex, checkedPageIndex+1)
+					printedPageList = slices.Insert(printedPageList, pageNumberIndex, checkedPage)
+
+					break checker
+				}
+			}
+		}
+
+		fixPrintedPagesOrder(printedPageList, orderingRules)
+	} else {
+		return
+	}
 }
 
 func readPageOrderingRulesAndPrintedPagesFromFile(inputFilePath string) (map[int][]int, [][]int, error) {
