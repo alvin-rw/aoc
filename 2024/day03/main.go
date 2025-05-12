@@ -1,10 +1,11 @@
-package aoc2024
+package main
 
 import (
 	"bufio"
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"slices"
 	"strconv"
@@ -44,7 +45,22 @@ const (
 	dontCommand
 )
 
-func CalculateMultiplicationResult(inputFilePath string, enableDoDonts bool) (int, error) {
+func main() {
+	multiplicationResult, err := calculateMultiplicationResult("./input.txt", false)
+	if err != nil {
+		log.Fatalf("error when calculating multiplication result: %v", err)
+	}
+
+	multiplicationResultWithDoDonts, err := calculateMultiplicationResult("./input.txt", true)
+	if err != nil {
+		log.Fatalf("error when calculating multiplication result: %v", err)
+	}
+
+	fmt.Printf("multiplication result: %d\n", multiplicationResult)
+	fmt.Printf("multiplication result with do and don'ts: %d\n", multiplicationResultWithDoDonts)
+}
+
+func calculateMultiplicationResult(inputFilePath string, enableDoDonts bool) (int, error) {
 	numbersToMultiply, err := readNumbersToMultiplyFromFile(inputFilePath, enableDoDonts)
 	if err != nil {
 		return -1, err
