@@ -1,20 +1,34 @@
-package aoc2024
+package main
 
 import (
-	"bufio"
-	"errors"
 	"fmt"
-	"io"
-	"os"
+	"log"
 	"slices"
 	"strconv"
 	"strings"
+
+	"github.com/alvin-rw/aoc2024/internal/file"
 )
 
-func CalculateTotalDistance(inputFilePath string) (int, error) {
+func main() {
+	totalDistance, err := calculateTotalDistance("./input.txt")
+	if err != nil {
+		log.Fatalf("error when calculating total distance: %v", err)
+	}
+
+	similarityScore, err := calculateSimilarityScore("./input.txt")
+	if err != nil {
+		log.Fatalf("error when calculating similarity score: %v", err)
+	}
+
+	fmt.Printf("total distance: %d\n", totalDistance)
+	fmt.Printf("similarity score: %d\n", similarityScore)
+}
+
+func calculateTotalDistance(inputFilePath string) (int, error) {
 	firstList, secondList, err := getSlicesFromInputFile(inputFilePath)
 	if err != nil {
-		return -1, fmt.Errorf("error when getting slice from input file: %v", err)
+		return -1, err
 	}
 
 	slices.Sort(firstList)
@@ -36,7 +50,7 @@ func CalculateTotalDistance(inputFilePath string) (int, error) {
 	return totalDistance, nil
 }
 
-func CalculateSimilarityScore(inputFilePath string) (int, error) {
+func calculateSimilarityScore(inputFilePath string) (int, error) {
 	firstList, secondList, err := getSlicesFromInputFile(inputFilePath)
 	if err != nil {
 		return -1, fmt.Errorf("error when getting slice from input file: %v", err)
@@ -57,39 +71,27 @@ func CalculateSimilarityScore(inputFilePath string) (int, error) {
 }
 
 func getSlicesFromInputFile(inputFilePath string) ([]int, []int, error) {
-	f, err := os.Open(inputFilePath)
+	fileContent, err := file.ReadFile(inputFilePath)
 	if err != nil {
-		return nil, nil, fmt.Errorf("error when opening the input file, %v", err)
+		return nil, nil, err
 	}
-	defer f.Close()
 
 	firstList := []int{}
 	secondList := []int{}
 
-	reader := bufio.NewReader(f)
-	for {
-		line, err := reader.ReadString('\n')
-		if err != nil {
-			if errors.Is(err, io.EOF) {
-				break
-			} else {
-				return nil, nil, fmt.Errorf("error when reading file, %v", err)
-			}
-		}
-
+	for _, line := range fileContent {
 		locationIds := strings.Split(line, "   ")
-		for i, locationId := range locationIds {
-			locationId = strings.TrimSuffix(locationId, "\n")
 
-			l, err := strconv.Atoi(locationId)
+		for i, locationId := range locationIds {
+			id, err := strconv.Atoi(locationId)
 			if err != nil {
-				return nil, nil, fmt.Errorf("error when converting string %s to int, %v", locationId, err)
+				return nil, nil, fmt.Errorf("error when converting string %s to int: %w", locationId, err)
 			}
 
 			if i == 0 {
-				firstList = append(firstList, l)
+				firstList = append(firstList, id)
 			} else {
-				secondList = append(secondList, l)
+				secondList = append(secondList, id)
 			}
 		}
 	}
@@ -101,11 +103,7 @@ func createOccurenceMap(list []int) map[int]int {
 	occurenceMap := make(map[int]int)
 
 	for _, n := range list {
-		if _, ok := occurenceMap[n]; ok {
-			occurenceMap[n] = occurenceMap[n] + 1
-		} else if !ok {
-			occurenceMap[n] = 1
-		}
+		occurenceMap[n]++
 	}
 
 	return occurenceMap
