@@ -42,8 +42,8 @@ func calculateDistinctPosition(mapMatrix [][]string, guardFirstPosition []int) i
 	mapMatrix[row][column] = "X"
 
 	for {
-		nextRow := getNextRow(row, direction, 1)
-		nextColumn := getNextColumn(column, direction, 1)
+		nextRow := matrix.GetNextRow(row, direction, 1)
+		nextColumn := matrix.GetNextColumn(column, direction, 1)
 
 		if nextColumn >= 0 && nextRow >= 0 && nextRow < maxRow && nextColumn < maxColumn(nextRow) {
 			if mapMatrix[nextRow][nextColumn] == "#" {

@@ -1,27 +1,31 @@
-package aoc2024
+package main
 
 import (
-	"bufio"
-	"errors"
 	"fmt"
-	"io"
-	"os"
+	"log"
 	"slices"
 	"strings"
+
+	"github.com/alvin-rw/aoc2024/internal/file"
+	"github.com/alvin-rw/aoc2024/internal/matrix"
 )
 
-const (
-	up = iota
-	down
-	right
-	left
-	upRight
-	upLeft
-	downRight
-	downLeft
-)
+func main() {
+	numberOfXMAS, err := calculateNumberOfXMAS("./input.txt")
+	if err != nil {
+		log.Fatalf("error when calculating number of XMAS: %v", err)
+	}
 
-func CalculateNumberOfXMAS(inputFilePath string) (int, error) {
+	numberOfX_MAS, err := calculateNumberOfX_MAS("./input.txt")
+	if err != nil {
+		log.Fatalf("error when calculating number of X-MAS: %v", err)
+	}
+
+	fmt.Printf("number of XMAS: %d\n", numberOfXMAS)
+	fmt.Printf("number of X-MAS: %d\n", numberOfX_MAS)
+}
+
+func calculateNumberOfXMAS(inputFilePath string) (int, error) {
 	inputMatrix, err := getInputMatrix(inputFilePath)
 	if err != nil {
 		return -1, err
@@ -36,7 +40,7 @@ func CalculateNumberOfXMAS(inputFilePath string) (int, error) {
 	return numberOfXMAS, nil
 }
 
-func CalculateNumberOfX_MAS(inputFilePath string) (int, error) {
+func calculateNumberOfX_MAS(inputFilePath string) (int, error) {
 	inputMatrix, err := getInputMatrix(inputFilePath)
 	if err != nil {
 		return -1, err
@@ -49,35 +53,6 @@ func CalculateNumberOfX_MAS(inputFilePath string) (int, error) {
 	numberOfX_MAS := findX_MASFromCenterIndex(aIndexes, inputMatrix, mas)
 
 	return numberOfX_MAS, nil
-}
-
-func getInputMatrix(inputFilePath string) ([][]string, error) {
-	f, err := os.Open(inputFilePath)
-	if err != nil {
-		return nil, fmt.Errorf("error when opening the file, %v", err)
-	}
-	defer f.Close()
-
-	matrix := [][]string{}
-
-	reader := bufio.NewReader(f)
-	for {
-		line, err := reader.ReadString('\n')
-		if err != nil {
-			if errors.Is(err, io.EOF) {
-				break
-			} else {
-				return nil, fmt.Errorf("error when reading file, %v", err)
-			}
-		}
-
-		line = strings.TrimSuffix(line, "\n")
-		lineSlice := strings.Split(line, "")
-
-		matrix = append(matrix, lineSlice)
-	}
-
-	return matrix, nil
 }
 
 func findAllStartingCharOccurenceInMatrix(matrix [][]string, char string) [][]int {
@@ -108,7 +83,7 @@ func findWordFromIndex(startingCharOccurenceIndexes [][]int, inputMatrix [][]str
 
 	wordLength := len(word)
 
-	searchDirections := []int{up, down, right, left, upRight, upLeft, downRight, downLeft}
+	searchDirections := []int{matrix.Up, matrix.Down, matrix.Right, matrix.Left, matrix.UpRight, matrix.UpLeft, matrix.DownRight, matrix.DownLeft}
 
 	for startingCharIndexRow, startingCharIndex := range startingCharOccurenceIndexes {
 		row := startingCharIndexRow
@@ -119,8 +94,8 @@ func findWordFromIndex(startingCharOccurenceIndexes [][]int, inputMatrix [][]str
 
 			wordSearch:
 				for i := 1; i < wordLength; i++ {
-					nextColumn := getNextColumn(column, direction, i)
-					nextRow := getNextRow(row, direction, i)
+					nextColumn := matrix.GetNextColumn(column, direction, i)
+					nextRow := matrix.GetNextRow(row, direction, i)
 
 					if nextColumn >= 0 && nextRow >= 0 && nextRow < maxRow && nextColumn < maxColumn(nextRow) {
 						if inputMatrix[nextRow][nextColumn] == word[i] {
@@ -154,8 +129,8 @@ func findX_MASFromCenterIndex(centerCharOccurenceIndexes [][]int, inputMatrix []
 	halfWordLength := len(word) / 2
 
 	searchDirectionGroup := [][]int{
-		{upRight, downLeft},
-		{upLeft, downRight},
+		{matrix.UpRight, matrix.DownLeft},
+		{matrix.UpLeft, matrix.DownRight},
 	}
 
 	for startingCharIndexRow, startingCharIndex := range centerCharOccurenceIndexes {
@@ -172,8 +147,8 @@ func findX_MASFromCenterIndex(centerCharOccurenceIndexes [][]int, inputMatrix []
 				for _, direction := range searchDirections {
 				wordSearch:
 					for i := 1; i <= halfWordLength; i++ {
-						nextColumn := getNextColumn(column, direction, i)
-						nextRow := getNextRow(row, direction, i)
+						nextColumn := matrix.GetNextColumn(column, direction, i)
+						nextRow := matrix.GetNextRow(row, direction, i)
 
 						if nextColumn >= 0 && nextRow >= 0 && nextRow < maxRow && nextColumn < maxColumn(nextRow) {
 							if slices.Contains(wordWithoutCenterChar, inputMatrix[nextRow][nextColumn]) {
@@ -202,52 +177,19 @@ func findX_MASFromCenterIndex(centerCharOccurenceIndexes [][]int, inputMatrix []
 	return numberOfWords
 }
 
-func getNextColumn(column int, direction int, modifier int) int {
-	nextColumn := column
-
-	switch direction {
-	case up:
-		nextColumn = column
-	case down:
-		nextColumn = column
-	case right:
-		nextColumn = column + modifier
-	case left:
-		nextColumn = column - modifier
-	case upRight:
-		nextColumn = column + modifier
-	case upLeft:
-		nextColumn = column - modifier
-	case downRight:
-		nextColumn = column + modifier
-	case downLeft:
-		nextColumn = column - modifier
+func getInputMatrix(inputFilePath string) ([][]string, error) {
+	fileContent, err := file.ReadFile(inputFilePath)
+	if err != nil {
+		return nil, err
 	}
 
-	return nextColumn
-}
+	matrix := [][]string{}
 
-func getNextRow(row int, direction int, modifier int) int {
-	nextRow := row
+	for _, line := range fileContent {
+		charactersList := strings.Split(line, "")
 
-	switch direction {
-	case up:
-		nextRow = row - modifier
-	case down:
-		nextRow = row + modifier
-	case right:
-		nextRow = row
-	case left:
-		nextRow = row
-	case upRight:
-		nextRow = row - modifier
-	case upLeft:
-		nextRow = row - modifier
-	case downRight:
-		nextRow = row + modifier
-	case downLeft:
-		nextRow = row + modifier
+		matrix = append(matrix, charactersList)
 	}
 
-	return nextRow
+	return matrix, nil
 }
