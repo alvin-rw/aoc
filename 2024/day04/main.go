@@ -6,8 +6,8 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/alvin-rw/aoc2024/internal/file"
-	"github.com/alvin-rw/aoc2024/internal/matrix"
+	"github.com/alvin-rw/aoc/internal/file"
+	"github.com/alvin-rw/aoc/internal/matrix"
 )
 
 func main() {

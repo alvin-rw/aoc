@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/alvin-rw/aoc2024/internal/file"
+	"github.com/alvin-rw/aoc/internal/file"
 )
 
 const (
