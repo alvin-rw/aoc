@@ -1,7 +1,8 @@
-package aoc2024
+package main
 
 import (
 	"fmt"
+	"log"
 	"slices"
 	"strings"
 
@@ -9,7 +10,16 @@ import (
 	"github.com/alvin-rw/aoc/internal/matrix"
 )
 
-func GetGuardNumberOfDistinctPosition(inputFilePath string) (int, error) {
+func main() {
+	guardsNumberOfDistinctPosition, err := getGuardsNumberOfDistinctPosition("./input.txt")
+	if err != nil {
+		log.Fatalf("error when calculating guard's number of distinct position: %v", err)
+	}
+
+	fmt.Printf("guard's number of distinct position: %d\n", guardsNumberOfDistinctPosition)
+}
+
+func getGuardsNumberOfDistinctPosition(inputFilePath string) (int, error) {
 	mapMatrix, err := createMapMatrix(inputFilePath)
 	if err != nil {
 		return -1, err
