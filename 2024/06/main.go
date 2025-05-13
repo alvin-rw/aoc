@@ -11,10 +11,7 @@ import (
 )
 
 func main() {
-	mapMatrix, err := createMapMatrix("./input.txt")
-	if err != nil {
-		log.Fatalf("error when creating map matrix: %v", err)
-	}
+	mapMatrix := createMapMatrix("./input.txt")
 
 	guardSymbol := "^"
 	guardFirstPosition, err := getGuardFirstPosition(mapMatrix, guardSymbol)
@@ -147,11 +144,8 @@ func getGuardFirstPosition(mapMatrix [][]string, guardSymbol string) ([]int, err
 	return nil, fmt.Errorf("cannot find guard in the map matrix")
 }
 
-func createMapMatrix(inputFilePath string) ([][]string, error) {
-	fileContent, err := file.ReadFile(inputFilePath)
-	if err != nil {
-		return nil, err
-	}
+func createMapMatrix(inputFilePath string) [][]string {
+	fileContent := file.ReadFile(inputFilePath)
 
 	mapMatrix := [][]string{}
 	for _, line := range fileContent {
@@ -160,5 +154,5 @@ func createMapMatrix(inputFilePath string) ([][]string, error) {
 		mapMatrix = append(mapMatrix, mapLevel)
 	}
 
-	return mapMatrix, nil
+	return mapMatrix
 }

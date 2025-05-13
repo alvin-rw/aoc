@@ -66,10 +66,7 @@ func calculateSumOfInvalidPagesMiddleValue(inputFilePath string) (int, error) {
 }
 
 func readPageOrderingRulesAndPrintedPagesFromFile(inputFilePath string) (map[int][]int, [][]int, error) {
-	fileContent, err := file.ReadFile(inputFilePath)
-	if err != nil {
-		return nil, nil, err
-	}
+	fileContent := file.ReadFile(inputFilePath)
 
 	// pageOrderingRules stores the list of numbers that need to be behind a certain number
 	// for example

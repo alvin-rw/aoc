@@ -5,10 +5,7 @@ import (
 )
 
 func TestGetGuardsNumberOfDistinctPosition(t *testing.T) {
-	mapMatrix, err := createMapMatrix("./test.txt")
-	if err != nil {
-		t.Errorf("error when creating map matrix: %v", err)
-	}
+	mapMatrix := createMapMatrix("./test.txt")
 
 	guardSymbol := "^"
 	guardFirstPosition, err := getGuardFirstPosition(mapMatrix, guardSymbol)

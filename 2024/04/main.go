@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"slices"
 	"strings"
 
@@ -11,25 +10,16 @@ import (
 )
 
 func main() {
-	numberOfXMAS, err := calculateNumberOfXMAS("./input.txt")
-	if err != nil {
-		log.Fatalf("error when calculating number of XMAS: %v", err)
-	}
+	numberOfXMAS := calculateNumberOfXMAS("./input.txt")
 
-	numberOfX_MAS, err := calculateNumberOfX_MAS("./input.txt")
-	if err != nil {
-		log.Fatalf("error when calculating number of X-MAS: %v", err)
-	}
+	numberOfX_MAS := calculateNumberOfX_MAS("./input.txt")
 
 	fmt.Printf("number of XMAS: %d\n", numberOfXMAS)
 	fmt.Printf("number of X-MAS: %d\n", numberOfX_MAS)
 }
 
-func calculateNumberOfXMAS(inputFilePath string) (int, error) {
-	inputMatrix, err := getInputMatrix(inputFilePath)
-	if err != nil {
-		return -1, err
-	}
+func calculateNumberOfXMAS(inputFilePath string) int {
+	inputMatrix := getInputMatrix(inputFilePath)
 
 	xmas := []string{"X", "M", "A", "S"}
 
@@ -37,14 +27,11 @@ func calculateNumberOfXMAS(inputFilePath string) (int, error) {
 
 	numberOfXMAS := findWordFromIndex(xIndexes, inputMatrix, xmas)
 
-	return numberOfXMAS, nil
+	return numberOfXMAS
 }
 
-func calculateNumberOfX_MAS(inputFilePath string) (int, error) {
-	inputMatrix, err := getInputMatrix(inputFilePath)
-	if err != nil {
-		return -1, err
-	}
+func calculateNumberOfX_MAS(inputFilePath string) int {
+	inputMatrix := getInputMatrix(inputFilePath)
 
 	mas := []string{"M", "A", "S"}
 
@@ -52,7 +39,7 @@ func calculateNumberOfX_MAS(inputFilePath string) (int, error) {
 
 	numberOfX_MAS := findX_MASFromCenterIndex(aIndexes, inputMatrix, mas)
 
-	return numberOfX_MAS, nil
+	return numberOfX_MAS
 }
 
 func findAllStartingCharOccurenceInMatrix(matrix [][]string, char string) [][]int {
@@ -177,11 +164,8 @@ func findX_MASFromCenterIndex(centerCharOccurenceIndexes [][]int, inputMatrix []
 	return numberOfWords
 }
 
-func getInputMatrix(inputFilePath string) ([][]string, error) {
-	fileContent, err := file.ReadFile(inputFilePath)
-	if err != nil {
-		return nil, err
-	}
+func getInputMatrix(inputFilePath string) [][]string {
+	fileContent := file.ReadFile(inputFilePath)
 
 	matrix := [][]string{}
 
@@ -191,5 +175,5 @@ func getInputMatrix(inputFilePath string) ([][]string, error) {
 		matrix = append(matrix, charactersList)
 	}
 
-	return matrix, nil
+	return matrix
 }

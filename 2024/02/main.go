@@ -100,10 +100,7 @@ func isReportSafe(report []int) bool {
 }
 
 func getReportsFromFile(inputFilePath string) ([][]int, error) {
-	fileContent, err := file.ReadFile(inputFilePath)
-	if err != nil {
-		return nil, err
-	}
+	fileContent := file.ReadFile(inputFilePath)
 
 	reports := [][]int{}
 	for _, line := range fileContent {

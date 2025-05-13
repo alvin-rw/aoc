@@ -71,10 +71,7 @@ func calculateSimilarityScore(inputFilePath string) (int, error) {
 }
 
 func getSlicesFromInputFile(inputFilePath string) ([]int, []int, error) {
-	fileContent, err := file.ReadFile(inputFilePath)
-	if err != nil {
-		return nil, nil, err
-	}
+	fileContent := file.ReadFile(inputFilePath)
 
 	firstList := []int{}
 	secondList := []int{}
