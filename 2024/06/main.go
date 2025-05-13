@@ -11,32 +11,87 @@ import (
 )
 
 func main() {
-	guardsNumberOfDistinctPosition, err := getGuardsNumberOfDistinctPosition("./input.txt")
+	mapMatrix, err := createMapMatrix("./input.txt")
 	if err != nil {
-		log.Fatalf("error when calculating guard's number of distinct position: %v", err)
-	}
-
-	fmt.Printf("guard's number of distinct position: %d\n", guardsNumberOfDistinctPosition)
-}
-
-func getGuardsNumberOfDistinctPosition(inputFilePath string) (int, error) {
-	mapMatrix, err := createMapMatrix(inputFilePath)
-	if err != nil {
-		return -1, err
+		log.Fatalf("error when creating map matrix: %v", err)
 	}
 
 	guardSymbol := "^"
 	guardFirstPosition, err := getGuardFirstPosition(mapMatrix, guardSymbol)
 	if err != nil {
-		return -1, err
+		log.Fatalf("error when getting guard first position %v", err)
 	}
 
-	numberOfDistinctPosition := calculateDistinctPosition(mapMatrix, guardFirstPosition)
+	numberOfDistinctPosition, guardVisitedPoints := calculateAndListDistinctPosition(mapMatrix, guardFirstPosition)
 
-	return numberOfDistinctPosition, nil
+	fmt.Printf("guard's number of distinct position: %d\n", numberOfDistinctPosition)
+
+	numOfPossibleObstruction := calculateNumberOfPossibleObstructions(mapMatrix, guardFirstPosition, guardVisitedPoints)
+
+	fmt.Printf("number of possible obstruction to cause a loop: %d\n", numOfPossibleObstruction)
 }
 
-func calculateDistinctPosition(mapMatrix [][]string, guardFirstPosition []int) int {
+func calculateNumberOfPossibleObstructions(mapMatrix [][]string, guardFirstPosition []int, guardVisitedPoints [][]int) int {
+	numberOfPossibleObstructionLocation := 0
+
+	maxRow := len(mapMatrix)
+	maxColumn := func(row int) int {
+		return len(mapMatrix[row])
+	}
+
+	for _, pointsVisited := range guardVisitedPoints {
+		direction := matrix.Up
+
+		obstructionRow := pointsVisited[0]
+		obstructionColumn := pointsVisited[1]
+
+		// make a deep copy of the mapMatrix and put the obstruction in the map
+		tempMapMatrix := make([][]string, len(mapMatrix))
+		for i := range mapMatrix {
+			tempMapMatrix[i] = slices.Clone(mapMatrix[i])
+		}
+
+		tempMapMatrix[obstructionRow][obstructionColumn] = "#"
+
+		// record all the coordinates that the guard used to turn
+		// in row,column,direction string format
+		// this is used for determining if this route is a loop
+		turningPoints := []string{}
+
+		row := guardFirstPosition[0]
+		column := guardFirstPosition[1]
+
+		for {
+			nextRow := matrix.GetNextRow(row, direction, 1)
+			nextColumn := matrix.GetNextColumn(column, direction, 1)
+
+			if nextColumn >= 0 && nextRow >= 0 && nextRow < maxRow && nextColumn < maxColumn(nextRow) {
+				if tempMapMatrix[nextRow][nextColumn] == "#" {
+					turningPoint := fmt.Sprintf("%d,%d,%d", row, column, direction)
+
+					direction = matrix.ChangeDirection90Degree(direction)
+
+					if slices.Contains(turningPoints, turningPoint) {
+						numberOfPossibleObstructionLocation++
+
+						break
+					} else {
+						turningPoints = append(turningPoints, turningPoint)
+					}
+				} else {
+					row = nextRow
+					column = nextColumn
+				}
+			} else {
+				break
+			}
+		}
+	}
+
+	return numberOfPossibleObstructionLocation
+}
+
+func calculateAndListDistinctPosition(mapMatrix [][]string, guardFirstPosition []int) (int, [][]int) {
 	numberOfDistinctPosition := 1
 	direction := matrix.Up
 
@@ -47,6 +102,9 @@ func calculateDistinctPosition(mapMatrix [][]string, guardFirstPosition []int) i
 
 	row := guardFirstPosition[0]
 	column := guardFirstPosition[1]
+
+	// list the points visited by guard, excluding the first position
+	pointsVisited := [][]int{}
 
 	// change guard first position to X
 	mapMatrix[row][column] = "X"
@@ -65,6 +123,8 @@ func calculateDistinctPosition(mapMatrix [][]string, guardFirstPosition []int) i
 				if mapMatrix[nextRow][nextColumn] == "." {
 					numberOfDistinctPosition++
 
+					pointsVisited = append(pointsVisited, []int{row, column})
+
 					mapMatrix[nextRow][nextColumn] = "X"
 				}
 			}
@@ -73,7 +133,7 @@ func calculateDistinctPosition(mapMatrix [][]string, guardFirstPosition []int) i
 		}
 	}
 
-	return numberOfDistinctPosition
+	return numberOfDistinctPosition, pointsVisited
 }
 
 func getGuardFirstPosition(mapMatrix [][]string, guardSymbol string) ([]int, error) {
