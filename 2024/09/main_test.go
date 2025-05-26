@@ -45,6 +45,11 @@ func TestGetChecksumPart2(t *testing.T) {
 			input: "./input.txt",
 			want:  6327174563252,
 		},
+		{
+			name:  "evil case", // source: https://www.reddit.com/r/adventofcode/comments/1haauty/2024_day_9_part_2_bonus_test_case_that_might_make/
+			input: "./evil.txt",
+			want:  5799706413896802,
+		},
 	}
 
 	for _, tt := range cases {

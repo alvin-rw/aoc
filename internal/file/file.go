@@ -20,6 +20,11 @@ func ReadFile(filePath string) []string {
 
 	scanner := bufio.NewScanner(f)
 
+	// increase buffer size to accomodate larger inputs
+	bufferSize := 256 * 1024 // 256 KB
+	buf := make([]byte, bufferSize)
+	scanner.Buffer(buf, bufferSize)
+
 	for scanner.Scan() {
 		line := scanner.Text()
 		fileContent = append(fileContent, line)
