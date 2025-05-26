@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	"github.com/alvin-rw/aoc/internal/file"
-	"github.com/alvin-rw/aoc/internal/utils"
 )
 
 type diskItem struct {
@@ -47,13 +46,7 @@ func calculateChecksum(diskMap []string) int {
 func compactDiskMap(diskMap []string) {
 	for i, diskItem := range diskMap {
 		if diskItem == "." {
-			// check if there are any numbers after the current .
-			diskMapPart := diskMap[i:]
-			if utils.GetNumberOfElementInSlice(diskMapPart, ".") == len(diskMapPart) {
-				break
-			}
-
-			for k := len(diskMap) - 1; k >= 0; k-- {
+			for k := len(diskMap) - 1; k >= i; k-- {
 				if diskMap[k] != "." {
 					diskMap[i] = diskMap[k]
 					diskMap[k] = "."
