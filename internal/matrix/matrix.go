@@ -76,3 +76,11 @@ func ChangeDirection90Degree(dir int) int {
 		panic("error when changing direction")
 	}
 }
+
+func CheckCoordinateInsideMatrix(coordinate []int, maxRow int, maxColumn int) bool {
+	if coordinate[0] >= 0 && coordinate[1] >= 0 && coordinate[0] < maxRow && coordinate[1] < maxColumn {
+		return true
+	} else {
+		return false
+	}
+}
