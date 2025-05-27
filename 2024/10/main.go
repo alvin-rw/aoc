@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -9,34 +11,13 @@ import (
 )
 
 func main() {
+	mapMatrix := getMapMatrix("./input.txt")
 
-}
+	trailheadIndexes := getTrailheadIndexes(mapMatrix)
+	trailheadPeaksMap := getTrailheadsPeaksMap(mapMatrix, trailheadIndexes)
+	totalTrailheadScore := calculateTrailheadScore(trailheadPeaksMap)
 
-func checkTrail(mapMatrix [][]int, startingPoint []int, startingSlope int, directions []int) []int {
-	maxRow := len(mapMatrix)
-	maxColumn := len(mapMatrix[0])
-
-	row := startingPoint[0]
-	column := startingPoint[1]
-
-	if mapMatrix[row][column] == 9 {
-		return []int{row, column}
-	}
-
-	for _, direction := range directions {
-		nextRow := matrix.GetNextRow(row, direction, 1)
-		nextColumn := matrix.GetNextColumn(column, direction, 1)
-
-		if matrix.CheckCoordinateInsideMatrix([]int{nextRow, nextColumn}, maxRow, maxColumn) {
-			if mapMatrix[nextRow][nextColumn] == startingSlope+1 {
-				if coord := checkTrail(mapMatrix, []int{nextRow, nextColumn}, mapMatrix[nextRow][nextColumn], directions); coord != nil {
-					return coord
-				}
-			}
-		}
-	}
-
-	return nil
+	fmt.Printf("total trailhead score: %d\n", totalTrailheadScore)
 }
 
 func getTrailheadIndexes(mapMatrix [][]int) [][]int {
@@ -51,6 +32,61 @@ func getTrailheadIndexes(mapMatrix [][]int) [][]int {
 	}
 
 	return trailheadIndexes
+}
+
+func getTrailheadsPeaksMap(mapMatrix [][]int, trailheadIndexes [][]int) map[string][]string {
+	trailheadPeaksMap := make(map[string][]string)
+
+	directions := []int{matrix.Up, matrix.Right, matrix.Down, matrix.Left}
+	for _, trailheadIndex := range trailheadIndexes {
+		trailheadStartingSlope := 0
+
+		checkTrail(mapMatrix, trailheadIndex, trailheadStartingSlope, directions, trailheadPeaksMap, trailheadIndex)
+	}
+
+	return trailheadPeaksMap
+}
+
+func checkTrail(mapMatrix [][]int, startingPoint []int, startingSlope int, directions []int, trailPeaksList map[string][]string, trailheadIndex []int) {
+	row := startingPoint[0]
+	column := startingPoint[1]
+
+	if mapMatrix[row][column] == 9 {
+		trailheadIndexCode := fmt.Sprintf("%v", trailheadIndex)
+		peakIndexCode := fmt.Sprintf("%v", []int{row, column})
+
+		if peaks, ok := trailPeaksList[trailheadIndexCode]; ok {
+			if !slices.Contains(peaks, peakIndexCode) {
+				trailPeaksList[trailheadIndexCode] = append(trailPeaksList[trailheadIndexCode], peakIndexCode)
+			}
+		} else {
+			trailPeaksList[trailheadIndexCode] = []string{peakIndexCode}
+		}
+		return
+	}
+
+	maxRow := len(mapMatrix)
+	maxColumn := len(mapMatrix[0])
+
+	for _, direction := range directions {
+		nextRow := matrix.GetNextRow(row, direction, 1)
+		nextColumn := matrix.GetNextColumn(column, direction, 1)
+
+		if matrix.CheckCoordinateInsideMatrix([]int{nextRow, nextColumn}, maxRow, maxColumn) {
+			if mapMatrix[nextRow][nextColumn] == startingSlope+1 {
+				checkTrail(mapMatrix, []int{nextRow, nextColumn}, mapMatrix[nextRow][nextColumn], directions, trailPeaksList, trailheadIndex)
+			}
+		}
+	}
+}
+
+func calculateTrailheadScore(trailheadPeaksMap map[string][]string) int {
+	totalTrailheadScore := 0
+	for _, achievablePeaks := range trailheadPeaksMap {
+		totalTrailheadScore += len(achievablePeaks)
+	}
+
+	return totalTrailheadScore
 }
 
 func getMapMatrix(inputFilePath string) [][]int {
@@ -84,6 +120,4 @@ Base case: (returns true if peak, returns false if terminated early)
 Recursion case:
 	- if we're not in peak and if we're in the number 1 higher than the previous number
 
-Input:
-	-
 **/
