@@ -19,14 +19,20 @@ func checkTrail(mapMatrix [][]int, startingPoint []int, startingSlope int, direc
 	row := startingPoint[0]
 	column := startingPoint[1]
 
-	direction := directions[0]
+	if mapMatrix[row][column] == 9 {
+		return []int{row, column}
+	}
 
-	nextRow := matrix.GetNextRow(row, direction, 1)
-	nextColumn := matrix.GetNextColumn(column, direction, 1)
+	for _, direction := range directions {
+		nextRow := matrix.GetNextRow(row, direction, 1)
+		nextColumn := matrix.GetNextColumn(column, direction, 1)
 
-	if matrix.CheckCoordinateInsideMatrix([]int{nextRow, nextColumn}, maxRow, maxColumn) {
-		if mapMatrix[nextRow][nextColumn] == startingSlope+1 {
-			checkTrail(mapMatrix, []int{nextRow, nextColumn}, mapMatrix[nextRow][nextColumn], directions)
+		if matrix.CheckCoordinateInsideMatrix([]int{nextRow, nextColumn}, maxRow, maxColumn) {
+			if mapMatrix[nextRow][nextColumn] == startingSlope+1 {
+				if coord := checkTrail(mapMatrix, []int{nextRow, nextColumn}, mapMatrix[nextRow][nextColumn], directions); coord != nil {
+					return coord
+				}
+			}
 		}
 	}
 
