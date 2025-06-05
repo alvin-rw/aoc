@@ -41,3 +41,39 @@ func TestBlink(t *testing.T) {
 		t.Errorf("got %v", stones)
 	}
 }
+
+func TestStoneCounter(t *testing.T) {
+	cases := []struct {
+		name       string
+		input      string
+		blinkCount int
+		want       int
+	}{
+		// {
+		// 	name:       "test",
+		// 	input:      "./test.txt",
+		// 	blinkCount: 6,
+		// 	want:       22,
+		// },
+		// {
+		// 	name:       "input part 1",
+		// 	input:      "./input.txt",
+		// 	blinkCount: 25,
+		// 	want:       218079,
+		// },
+		{
+			name:       "input part 1",
+			input:      "./input.txt",
+			blinkCount: 75,
+			want:       218079,
+		},
+	}
+
+	for _, tt := range cases {
+		stones := getInputStones(tt.input)
+
+		if got := getStoneCountAfterBlinks(tt.blinkCount, stones); got != tt.want {
+			t.Errorf("%s, got %d, want %d", tt.name, got, tt.want)
+		}
+	}
+}
