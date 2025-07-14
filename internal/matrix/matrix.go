@@ -1,5 +1,11 @@
 package matrix
 
+import (
+	"fmt"
+	"strconv"
+	"strings"
+)
+
 // movement direction inside a matrix
 const (
 	Up = iota
@@ -77,10 +83,27 @@ func ChangeDirection90Degree(dir int) int {
 	}
 }
 
-func CheckCoordinateInsideMatrix(coordinate []int, maxRow int, maxColumn int) bool {
-	if coordinate[0] >= 0 && coordinate[1] >= 0 && coordinate[0] < maxRow && coordinate[1] < maxColumn {
+// CheckCoordinateInsideMatrix checks if coordinate (in the format []int{Row, Column})
+// is located inside the matrix
+func CheckCoordinateInsideMatrix(coordinate []int, numOfRows int, numOfColumns int) bool {
+	if coordinate[0] >= 0 && coordinate[1] >= 0 && coordinate[0] < numOfRows && coordinate[1] < numOfColumns {
 		return true
 	} else {
 		return false
 	}
+}
+
+// Change coordinate to string format (row,col)
+func CoordToString(row, col int) string {
+	return fmt.Sprintf("%d,%d", row, col)
+}
+
+// Extract row and column from string formatted (row,col)
+// Return values are row, column
+func StringToCoord(s string) (int, int) {
+	coord := strings.Split(s, ",")
+	row, _ := strconv.Atoi(coord[0])
+	col, _ := strconv.Atoi(coord[1])
+
+	return row, col
 }
