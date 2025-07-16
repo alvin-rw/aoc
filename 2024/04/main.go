@@ -70,7 +70,7 @@ func findWordFromIndex(startingCharOccurenceIndexes [][]int, inputMatrix [][]str
 
 	wordLength := len(word)
 
-	searchDirections := []int{matrix.Up, matrix.Down, matrix.Right, matrix.Left, matrix.UpRight, matrix.UpLeft, matrix.DownRight, matrix.DownLeft}
+	searchDirections := []matrix.Direction{matrix.Up, matrix.Down, matrix.Right, matrix.Left, matrix.UpRight, matrix.UpLeft, matrix.DownRight, matrix.DownLeft}
 
 	for startingCharIndexRow, startingCharIndex := range startingCharOccurenceIndexes {
 		row := startingCharIndexRow
@@ -115,7 +115,7 @@ func findX_MASFromCenterIndex(centerCharOccurenceIndexes [][]int, inputMatrix []
 
 	halfWordLength := len(word) / 2
 
-	searchDirectionGroup := [][]int{
+	searchDirectionGroup := [][]matrix.Direction{
 		{matrix.UpRight, matrix.DownLeft},
 		{matrix.UpLeft, matrix.DownRight},
 	}

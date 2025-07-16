@@ -8,7 +8,7 @@ import (
 
 // movement direction inside a matrix
 const (
-	Up = iota
+	Up Direction = iota
 	Down
 	Right
 	Left
@@ -18,7 +18,9 @@ const (
 	DownLeft
 )
 
-func GetNextColumn(column int, direction int, modifier int) int {
+type Direction uint8
+
+func GetNextColumn(column int, direction Direction, modifier int) int {
 	nextColumn := column
 
 	switch direction {
@@ -43,7 +45,7 @@ func GetNextColumn(column int, direction int, modifier int) int {
 	return nextColumn
 }
 
-func GetNextRow(row int, direction int, modifier int) int {
+func GetNextRow(row int, direction Direction, modifier int) int {
 	nextRow := row
 
 	switch direction {
@@ -68,7 +70,7 @@ func GetNextRow(row int, direction int, modifier int) int {
 	return nextRow
 }
 
-func ChangeDirection90Degree(dir int) int {
+func ChangeDirection90Degree(dir Direction) Direction {
 	switch dir {
 	case Up:
 		return Right

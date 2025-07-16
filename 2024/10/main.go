@@ -40,7 +40,7 @@ func getTrailheadIndexes(mapMatrix [][]int) [][]int {
 func getTrailheadsPeakMapAndRatings(mapMatrix [][]int, trailheadIndexes [][]int, totalTrailheadRatings *int) map[string][]string {
 	trailheadPeakMap := make(map[string][]string)
 
-	directions := []int{matrix.Up, matrix.Right, matrix.Down, matrix.Left}
+	directions := []matrix.Direction{matrix.Up, matrix.Right, matrix.Down, matrix.Left}
 	for _, trailheadIndex := range trailheadIndexes {
 		trailheadStartingSlope := 0
 
@@ -50,7 +50,7 @@ func getTrailheadsPeakMapAndRatings(mapMatrix [][]int, trailheadIndexes [][]int,
 	return trailheadPeakMap
 }
 
-func checkTrail(mapMatrix [][]int, startingPoint []int, startingSlope int, directions []int, trailheadPeakMap map[string][]string, trailheadIndex []int, totalTrailheadRatings *int) {
+func checkTrail(mapMatrix [][]int, startingPoint []int, startingSlope int, directions []matrix.Direction, trailheadPeakMap map[string][]string, trailheadIndex []int, totalTrailheadRatings *int) {
 	row := startingPoint[0]
 	column := startingPoint[1]
 

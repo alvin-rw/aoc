@@ -30,7 +30,7 @@ func calculateFencePrice(mapMatrix [][]string) int {
 	numOfRows := len(mapMatrix)
 	numOfColumns := len(mapMatrix[0])
 
-	directionsToCheck := []int{matrix.Up, matrix.Right, matrix.Down, matrix.Left}
+	directionsToCheck := []matrix.Direction{matrix.Up, matrix.Right, matrix.Down, matrix.Left}
 	for row, line := range mapMatrix {
 		for column, plant := range line {
 			if _, ok := visited[matrix.CoordToString(row, column)]; !ok {
@@ -71,7 +71,7 @@ func calculateFencePrice(mapMatrix [][]string) int {
 	return totalPrice
 }
 
-func checkCell(visited map[string]struct{}, mapMatrix [][]string, row, col, direction int, toVisit *[]string, currentField *field, maxRow int, maxCol int, plant string) {
+func checkCell(visited map[string]struct{}, mapMatrix [][]string, row, col int, direction matrix.Direction, toVisit *[]string, currentField *field, maxRow int, maxCol int, plant string) {
 	nextRow := matrix.GetNextRow(row, direction, 1)
 	nextColumn := matrix.GetNextColumn(col, direction, 1)
 
