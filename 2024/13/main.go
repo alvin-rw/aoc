@@ -17,12 +17,8 @@ type machine struct {
 	buttonBPushedTimes int
 }
 
-func (m machine) checkXReached() bool {
-	return m.a.x*m.buttonAPushedTimes+m.b.x*m.buttonBPushedTimes == m.prize.x
-}
-
-func (m machine) checkYReached() bool {
-	return m.a.y*m.buttonAPushedTimes+m.b.y*m.buttonBPushedTimes == m.prize.y
+func (m machine) checkPrizeReached() bool {
+	return m.a.x*m.buttonAPushedTimes+m.b.x*m.buttonBPushedTimes == m.prize.x && m.a.y*m.buttonAPushedTimes+m.b.y*m.buttonBPushedTimes == m.prize.y
 }
 
 func (m machine) calculateCost() int {
@@ -35,18 +31,30 @@ type button struct {
 	cost int
 }
 
+// returns the most times we can push a button without exceeding the destination
+// retuns true if destination reached
+func (b button) checkButtonCanReachDestination(xDest, yDest int) (int, bool) {
+	// number of button pressed to reach destination X & Y coordinate
+	toX := xDest / b.x
+	toY := yDest / b.y
+
+	buttonPress := 0
+	buttonPress = min(toX, toY)
+
+	destinationReached := toX == toY && // same number of button press required to reach X and Y
+		xDest%b.x == 0 && // button can cover X distance
+		yDest%b.y == 0 // button can cover Y distance
+
+	return buttonPress, destinationReached
+}
+
 type location struct {
 	x int
 	y int
 }
 
-func (l *location) pushButton(b button) {
-	l.x += b.x
-	l.y += b.y
-}
-
 func main() {
-	machines := getButtonAndPrizeList("input.txt")
+	machines := getMachinesDetails("input.txt")
 
 	totalCost := 0
 	for _, m := range machines {
@@ -59,62 +67,60 @@ func main() {
 func calculateMachineCost(m *machine) int {
 	// check if pressing 1 button can take us to the prize
 
-	// number of button B pressed to reach prize's X & Y coordinate
-	bToX := m.prize.x / m.b.x
-	bToY := m.prize.y / m.b.y
-	// bOnly shows if it's possible to reach the prize using only B
-	bOnly := bToX == bToY && m.prize.x%m.b.x == 0 && m.prize.y%m.b.y == 0
-
-	// number of button A pressed to reach prize's X & Y coordinate
-	aToX := m.prize.x / m.a.x
-	aToY := m.prize.y / m.a.y
-	// aOnly shows if it's possible to reach the prize using only A
-	aOnly := aToX == aToY && m.prize.x%m.a.x == 0 && m.prize.y%m.a.y == 0
+	aTimes, possibleAOnly := m.a.checkButtonCanReachDestination(m.prize.x, m.prize.y)
+	bTimes, possibleBOnly := m.b.checkButtonCanReachDestination(m.prize.x, m.prize.y)
 
 	switch {
-	case aOnly && bOnly:
-		if bToX < aToX*3 {
-			return bToX
+	case possibleAOnly && possibleBOnly:
+		if bTimes < aTimes*3 {
+			return bTimes
 		} else {
-			return aToX
+			return aTimes
 		}
-	case aOnly:
-		return aToX * 3
-	case bOnly:
-		return bToX
+	case possibleAOnly:
+		return aTimes * 3
+	case possibleBOnly:
+		return bTimes
+	// we can return early if pressing b or a button once will take us beyond destination
+	// because this means not a b&a combination and they're checked already
+	case bTimes == 0 || aTimes == 0:
+		return 0
 	}
 
 	// check button combination
 	// press B button as much as we can without exceeding the coordinate
-	if bToX < bToY {
-		m.buttonAPushedTimes = bToX
-	} else {
-		m.buttonBPushedTimes = bToY
+	m.buttonBPushedTimes = bTimes
+
+	for range m.buttonBPushedTimes {
+		if m.checkPrizeReached() {
+			break
+		}
+
+		xDistanceToCover := m.prize.x - (m.b.x * m.buttonBPushedTimes)
+		yDistanceToCover := m.prize.y - (m.b.y * m.buttonBPushedTimes)
+
+		if push, destReached := m.a.checkButtonCanReachDestination(xDistanceToCover, yDistanceToCover); destReached {
+			m.buttonAPushedTimes = push
+			break
+		}
+		m.buttonBPushedTimes--
 	}
 
 	return m.calculateCost()
 }
 
-// buttonMash is the recursive function to find the button combination
-// that will take us to the prize
-func buttonMash(m *machine) {
-	if m.checkXReached() && m.checkYReached() {
-		return
-	}
-}
-
-func getButtonAndPrizeList(inputFilePath string) []machine {
+func getMachinesDetails(inputFilePath string) []machine {
 	machines := []machine{}
 
 	fileContent := file.ReadFile(inputFilePath)
 
 	m := &machine{}
 	for _, line := range fileContent {
-		if strings.Contains("Button A", line) {
+		if strings.Contains(line, "Button A") {
 			m.a = parseButtonString(line)
-		} else if strings.Contains("Button B", line) {
+		} else if strings.Contains(line, "Button B") {
 			m.b = parseButtonString(line)
-		} else if strings.Contains("Prize", line) {
+		} else if strings.Contains(line, "Prize") {
 			m.prize = parsePrizeString(line)
 
 			machines = append(machines, *m)
@@ -127,9 +133,9 @@ func getButtonAndPrizeList(inputFilePath string) []machine {
 
 func parseButtonString(s string) button {
 	cost := 0
-	if strings.Contains("Button A", s) {
+	if strings.Contains(s, "Button A") {
 		cost = 3
-	} else if strings.Contains("Button B", s) {
+	} else if strings.Contains(s, "Button B") {
 		cost = 1
 	}
 
@@ -141,7 +147,7 @@ func parseButtonString(s string) button {
 	}
 	x, _ := strconv.Atoi(xString)
 
-	elem = slices.Delete(elem, slices.Index(elem, ","), slices.Index(elem, ",")+1)
+	elem = slices.Delete(elem, 0, slices.Index(elem, ",")+1)
 
 	yString := ""
 	for i := (slices.Index(elem, "+") + 1); i < len(elem); i++ {
@@ -165,7 +171,7 @@ func parsePrizeString(s string) location {
 	}
 	x, _ := strconv.Atoi(xString)
 
-	elem = slices.Delete(elem, slices.Index(elem, ","), slices.Index(elem, ",")+1)
+	elem = slices.Delete(elem, 0, slices.Index(elem, ",")+1)
 
 	yString := ""
 	for i := (slices.Index(elem, "=") + 1); i < len(elem); i++ {
@@ -178,18 +184,3 @@ func parsePrizeString(s string) location {
 		y: y,
 	}
 }
-
-/**
-recursion
-
-base case
-x = x
-y = y
-
-or
-button A = 0
-button B = all
-
-
-
-**/
