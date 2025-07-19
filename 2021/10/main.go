@@ -15,6 +15,13 @@ var (
 		'>': 25137,
 	}
 
+	autoCompleteCharacterScore = map[rune]int{
+		')': 1,
+		']': 2,
+		'}': 3,
+		'>': 4,
+	}
+
 	pairs = map[rune]rune{
 		'(': ')',
 		'[': ']',
@@ -26,31 +33,47 @@ var (
 func main() {
 	lines := file.ReadFile("input.txt")
 
-	score := calculateSyntaxErrorScore(lines)
-	fmt.Printf("syntax error score %d\n", score)
+	corruptedScore, autoCompleteScore := calculateSyntaxErrorScore(lines)
+	fmt.Printf("corrupted error score %d\n", corruptedScore)
+	fmt.Printf("autocomplete error score %d\n", autoCompleteScore)
 }
 
-func calculateSyntaxErrorScore(lines []string) int {
-	score := 0
+func calculateSyntaxErrorScore(lines []string) (int, int) {
+	corruptedScore := 0
+	autoCompleteScores := []int{}
 
 	for _, line := range lines {
 		expectedClosingBrackets := []rune{}
+		corrupted := false
 
 		for _, bracket := range line {
 			if checkIfOpeningBracket(bracket) {
 				expectedClosingBrackets = append(expectedClosingBrackets, pairs[bracket])
 			} else {
 				if bracket != expectedClosingBrackets[len(expectedClosingBrackets)-1] {
-					score += illegalCharacterScore[bracket]
+					corruptedScore += illegalCharacterScore[bracket]
+					corrupted = true
 					break
 				} else {
 					expectedClosingBrackets = slices.Delete(expectedClosingBrackets, len(expectedClosingBrackets)-1, len(expectedClosingBrackets))
 				}
 			}
 		}
+
+		if !corrupted {
+			score := 0
+			for _, bracket := range slices.Backward(expectedClosingBrackets) {
+				score = score * 5
+				score += autoCompleteCharacterScore[bracket]
+			}
+			autoCompleteScores = append(autoCompleteScores, score)
+		}
 	}
 
-	return score
+	slices.Sort(autoCompleteScores)
+	autoCompleteScore := autoCompleteScores[len(autoCompleteScores)/2]
+
+	return corruptedScore, autoCompleteScore
 }
 
 func checkIfOpeningBracket(b rune) bool {

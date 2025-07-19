@@ -9,8 +9,15 @@ import (
 func Test(t *testing.T) {
 	lines := file.ReadFile("test.txt")
 
-	want := 26397
-	if score := calculateSyntaxErrorScore(lines); score != want {
-		t.Errorf("score %d, want %d\n", score, want)
+	wantCorrupted := 26397
+	wantAutoComplete := 288957
+	corruptedScore, autoCompleteScore := calculateSyntaxErrorScore(lines)
+
+	if corruptedScore != wantCorrupted {
+		t.Errorf("corruptedScore %d, want %d\n", corruptedScore, wantCorrupted)
+	}
+
+	if autoCompleteScore != wantAutoComplete {
+		t.Errorf("autoCompleteScore %d, want %d\n", autoCompleteScore, wantCorrupted)
 	}
 }
