@@ -9,10 +9,13 @@ import (
 
 func main() {
 	measurements := getMeasurements("input.txt")
+	measurementsSlidingWindow := getMeasurementSlidingWindow(measurements)
 
 	numOfLargerMeasurements := getNumOfLargerMeasurements(measurements)
+	numOfLargerMeasurementsSlidingWindow := getNumOfLargerMeasurements(measurementsSlidingWindow)
 
 	fmt.Printf("number of larger measurements %d\n", numOfLargerMeasurements)
+	fmt.Printf("number of larger measurements in the sliding window %d\n", numOfLargerMeasurementsSlidingWindow)
 }
 
 func getNumOfLargerMeasurements(measurements []int) int {
@@ -25,6 +28,16 @@ func getNumOfLargerMeasurements(measurements []int) int {
 	}
 
 	return numOfLargerMeasurements
+}
+
+func getMeasurementSlidingWindow(measurements []int) []int {
+	measurementsSlidingWindow := make([]int, len(measurements)-2)
+
+	for i := range measurementsSlidingWindow {
+		measurementsSlidingWindow[i] = measurements[i] + measurements[i+1] + measurements[i+2]
+	}
+
+	return measurementsSlidingWindow
 }
 
 func getMeasurements(inputFilePath string) []int {
