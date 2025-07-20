@@ -11,18 +11,25 @@ import (
 
 func main() {
 	crabLocations, lowest, highest := getCrabLocationsAndBoundaries("input.txt")
-	fuelConsumed := getLowestFuel(crabLocations, lowest, highest)
+	fuelConsumedPartOne := getLowestFuel(crabLocations, lowest, highest, 1)
+	fuelConsumedPartTwo := getLowestFuel(crabLocations, lowest, highest, 2)
 
-	fmt.Printf("lowest possible fuel consumed %d\n", fuelConsumed)
+	fmt.Printf("lowest possible fuel consumed part one: %d\n", fuelConsumedPartOne)
+	fmt.Printf("lowest possible fuel consumed part two: %d\n", fuelConsumedPartTwo)
 }
 
-func getLowestFuel(crabLocations map[int]int, lowest, highest int) int {
+func getLowestFuel(crabLocations map[int]int, lowest, highest int, part int) int {
 	fuelConsumed := 0
 
 	for i := lowest; i <= highest; i++ {
 		fuelConsumedForCurrentIteration := 0
 		for position, numOfCrabs := range crabLocations {
-			fuelConsumedForCurrentIteration += maths.Abs(position-i) * numOfCrabs
+			switch part {
+			case 1:
+				fuelConsumedForCurrentIteration += maths.Abs(position-i) * numOfCrabs
+			case 2:
+				fuelConsumedForCurrentIteration += getArithmeticFuelCost(maths.Abs(position-i)) * numOfCrabs
+			}
 		}
 
 		if i == lowest {
@@ -33,6 +40,19 @@ func getLowestFuel(crabLocations map[int]int, lowest, highest int) int {
 	}
 
 	return fuelConsumed
+}
+
+func getArithmeticFuelCost(distance int) int {
+	switch distance {
+	case 1:
+		return 1
+	case 0:
+		return 0
+	}
+
+	return distance + getArithmeticFuelCost(distance-1)
+	// or we can use aritmethic function
+	// sum = n(n-1)/2
 }
 
 // returns map[int]int of (map[crab location]number of crabs in that location)

@@ -5,11 +5,28 @@ import (
 )
 
 func Test(t *testing.T) {
-	crabLocations, lowest, highest := getCrabLocationsAndBoundaries("test.txt")
+	cases := []struct {
+		part          int
+		inputFilePath string
+		want          int
+	}{
+		{
+			part:          1,
+			inputFilePath: "test.txt",
+			want:          37,
+		},
+		{
+			part:          2,
+			inputFilePath: "test.txt",
+			want:          168,
+		},
+	}
 
-	want := 37
+	for _, tt := range cases {
+		crabLocations, lowest, highest := getCrabLocationsAndBoundaries(tt.inputFilePath)
 
-	if fuelConsumed := getLowestFuel(crabLocations, lowest, highest); fuelConsumed != want {
-		t.Errorf("part 1: got %d, want %d", fuelConsumed, want)
+		if fuelConsumed := getLowestFuel(crabLocations, lowest, highest, tt.part); fuelConsumed != tt.want {
+			t.Errorf("part %d: got %d, want %d", tt.part, fuelConsumed, tt.want)
+		}
 	}
 }
